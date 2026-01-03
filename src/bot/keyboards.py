@@ -13,3 +13,8 @@ def main_menu_kb() -> InlineKeyboardMarkup:
     )
     kb.adjust(2, 1)
     return kb.as_markup()
+
+def product_add_kb(product_id: int) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text="Добавить в корзину", callback_data=f"cart:add:{product_id}"))
+    return kb.as_markup()
