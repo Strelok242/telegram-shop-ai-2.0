@@ -4,6 +4,10 @@ from aiogram.types import Message, CallbackQuery
 
 from .keyboards import main_menu_kb
 
+from src.db.database import async_session
+from src.db.crud import list_products
+
+
 router = Router()
 
 
@@ -19,7 +23,21 @@ async def cmd_start(message: Message) -> None:
 @router.callback_query(F.data == "menu:catalog")
 async def on_catalog(callback: CallbackQuery) -> None:
     await callback.answer()
-    await callback.message.answer("Каталог: пока заглушка. Дальше подключим базу и товары.")
+
+    async with async_session() as session:
+        products = await list_products(session)
+
+    if not products:
+        await callback.message.answer("Каталог пуст.")
+        return
+
+    lines = ["Каталог товаров:"]
+    for p in products:
+        price = p.price_cents / 100
+        lines.append(f"• {p.title} — {price:.2f} ₽")
+
+    await callback.message.answer("\n".join(lines))
+
 
 
 @router.callback_query(F.data == "menu:cart")
